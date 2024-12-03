@@ -1,35 +1,36 @@
 <!DOCTYPE html>
-<html>
-    <head><title>SignalR Chat</title></head>
-    <body>
-        <input type="text" id="userInput" placeholder="Enter your name" />
-        <input type="text" id="messageInput" placeholder="Enter your message" />
-        <button onclick="sendMessage()">Send</button>
-
-        <ul id="messagesList"></ul>
-
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.0/signalr.min.js" ></script>
-        <script>
-            const connection = new signalR.HubConnectionBuilder().withUrl("/chatHub").build();
-
-            connection.on("ReceiveMessage", (user, message) => {
-                const li = document.createElement("li");
-                li.textContent = `${user}: ${message}`;
-                document.getElementById("messagesList").appendChild(li);
-            });
-
-            connection.start().catch(err => console.error(err.toSrting()));
-
-            function sendMessage() {
-                const userInput = document.getElementById("userInput");
-                const user = userInput.value;
-
-                const messageInput = document.getElementById("messageInput");
-                const message = messageInput.value;
-                messageInput.value = "";
-                connection.invoke("SendMessage", user, message)
-                    .catch(err => console.error(err.toSrting()));
-            }
-        </script>
-    </body>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Homepage</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f4;
+        }
+        .button {
+            padding: 20px 40px;
+            font-size: 24px;
+            color: white;
+            background-color: red;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+        .button:hover {
+            background-color: darkred;
+        }
+    </style>
+</head>
+<body>
+    <a href="chat.html" class="button">Start Chatting</a>
+</body>
 </html>
