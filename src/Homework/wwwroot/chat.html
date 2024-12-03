@@ -1,35 +1,87 @@
 <!DOCTYPE html>
 <html>
-    <head><title>SignalR Chat</title></head>
-    <body>
-        <input type="text" id="userInput" placeholder="Enter your name" />
-        <input type="text" id="messageInput" placeholder="Enter your message" />
-        <button onclick="sendMessage()">Send</button>
 
-        <ul id="messagesList"></ul>
+<head>
+    <title>SignalR Chat</title>
+</head>
 
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.0/signalr.min.js" ></script>
-        <script>
-            const connection = new signalR.HubConnectionBuilder().withUrl("/chatHub").build();
+<body>
+    <input type="text" id="userInput" placeholder="Enter your name" />
+    <input type="text" id="messageInput" placeholder="Enter your message" />
+    <button onclick="sendMessage()">Send</button>
 
-            connection.on("ReceiveMessage", (user, message) => {
-                const li = document.createElement("li");
-                li.textContent = `${user}: ${message}`;
-                document.getElementById("messagesList").appendChild(li);
-            });
+    <ul id="messagesList"></ul>
 
-            connection.start().catch(err => console.error(err.toSrting()));
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.0/signalr.min.js"></script>
+    <script>
+        async function registerUser() {
+            const userInput = document.getElementById("userInput");
+            const user = userInput.value.trim();
 
-            function sendMessage() {
-                const userInput = document.getElementById("userInput");
-                const user = userInput.value;
-
-                const messageInput = document.getElementById("messageInput");
-                const message = messageInput.value;
-                messageInput.value = "";
-                connection.invoke("SendMessage", user, message)
-                    .catch(err => console.error(err.toSrting()));
+            if (!user) {
+                alert("Username cannot be empty.");
+                return;
             }
-        </script>
-    </body>
+
+            try {
+                await connection.invoke("RegisterUser", user);
+                alert("Username registered successfully!");
+            } catch (error) {
+                alert(error.toString());
+            }
+        }
+        const connection = new signalR.HubConnectionBuilder().withUrl("/chatHub").build();
+
+        connection.on("ReceiveMessage", (user, message) => {
+            const li = document.createElement("li");
+            li.textContent = `${user}: ${message}`;
+            document.getElementById("messagesList").appendChild(li);
+        });
+
+        connection.start().catch(err => console.error(err.toSrting()));
+
+        let isUserRegistered = false;
+
+        async function registerUser() {
+            const userInput = document.getElementById("userInput");
+            const user = userInput.value.trim();
+
+            if (!user) {
+                alert("Username cannot be empty.");
+                return;
+            }
+
+            try {
+                await connection.invoke("RegisterUser", user);
+                isUserRegistered = true;
+                userInput.disabled = true; // Disable username input after registration
+                alert("Username registered successfully!");
+            } catch (error) {
+                alert(error.toString());
+            }
+        }
+
+        async function sendMessage() {
+            if (!isUserRegistered) {
+                alert("Please register a username first.");
+                return;
+            }
+
+            const userInput = document.getElementById("userInput");
+            const user = userInput.value;
+
+            const messageInput = document.getElementById("messageInput");
+            const message = messageInput.value;
+            messageInput.value = "";
+
+            try {
+                await connection.invoke("SendMessage", user, message);
+            } catch (error) {
+                console.error(error.toString());
+            }
+        }
+    </script>
+    <button onclick="registerUser()">Register</button>
+</body>
+
 </html>
